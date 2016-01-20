@@ -107,7 +107,7 @@ add_port lang/python
 # conflicting version of python (the below is installed as dependency of another port albeit as a different version)
 #add_port devel/py-setuptools
 add_port dns/py-bonjour
-add_port dns/py-dnspython
+add_port dns/py-dnspython2
 add_port devel/tevent
 add_port devel/talloc MAKE_JOBS_UNSAFE=y MAKE_JOBS_NUMBER=1
 add_port devel/libexecinfo
@@ -315,18 +315,21 @@ add_port devel/libinotify
 add_port dns/samba-nsupdate
 add_port security/gnutls \
        OPTIONS_FILE_UNSET+=TPM
-add_port_debug net/samba41 \
+add_port_debug net/samba43 \
        OPTIONS_FILE_SET+=ACL_SUPPORT \
        OPTIONS_FILE_SET+=ADS \
        OPTIONS_FILE_SET+=AD_DC \
        OPTIONS_FILE_SET+=AIO_SUPPORT \
        OPTIONS_FILE_UNSET+=AVAHI \
+       OPTIONS_FILE_UNSET+=CLUSTER \
        OPTIONS_FILE_UNSET+=CUPS \
        OPTIONS_FILE_SET+=DEBUG \
        OPTIONS_FILE_UNSET+=DEVELOPER \
        OPTIONS_FILE_SET+=DNSUPDATE \
+       OPTIONS_FILE_SET+=DOCS \
        OPTIONS_FILE_SET+=EXP_MODULES \
        OPTIONS_FILE_SET+=FAM \
+       OPTIONS_FILE_SET+=GLUSTERFS \
        OPTIONS_FILE_SET+=LDAP \
        OPTIONS_FILE_SET+=LIBZFS \
        OPTIONS_FILE_SET+=MANPAGES \
@@ -334,6 +337,7 @@ add_port_debug net/samba41 \
        OPTIONS_FILE_SET+=PAM_SMBPASS \
        OPTIONS_FILE_SET+=PTHREADPOOL \
        OPTIONS_FILE_SET+=QUOTAS \
+       OPTIONS_FILE_UNSET+=SPOTLIGHT \
        OPTIONS_FILE_UNSET+=SWAT \
        OPTIONS_FILE_SET+=SYSLOG \
        OPTIONS_FILE_SET+=UTMP \

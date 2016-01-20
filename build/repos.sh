@@ -27,7 +27,7 @@ fi
 : ${GIT_FREEBSD_BRANCH=masters/releng/9.3}
 : ${GIT_FREEBSD_CHECKOUT_PATH="${AVATAR_ROOT}/FreeBSD/src"}
 
-: ${GIT_PORTS_BRANCH=masters/2014q4}
+: ${GIT_PORTS_BRANCH=feature/samba43}
 : ${GIT_PORTS_CHECKOUT_PATH="${AVATAR_ROOT}/FreeBSD/ports"}
 
 : ${GIT_LICENSELIB_CHECKOUT_PATH="${AVATAR_ROOT}/nas_source/licenselib"}
