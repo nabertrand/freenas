@@ -351,6 +351,10 @@ add_port security/pam_google_authenticator
 add_port benchmarks/fio
 add_port sysutils/htop
 add_port games/cowsay
+add_port www/py-graphite-web
+add_port databases/py-python-rrdtool
+add_port www/grafana
+
 
 if [ "${DEBUG}" = 1 ]; then
 	add_port editors/vim-lite
