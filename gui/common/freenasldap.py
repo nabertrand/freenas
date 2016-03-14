@@ -2181,7 +2181,7 @@ class FreeNAS_ActiveDirectory_Base(object):
         if self.disable_freenas_cache:
             self.ucount = 0
             log.debug("FreeNAS_ActiveDirectory_Base.get_users: leave")
-            return
+            return users
         scope = ldap.SCOPE_SUBTREE
         filter = '(&(|(objectclass=user)(objectclass=person))' \
             '(sAMAccountName=*))'
@@ -2261,7 +2261,7 @@ class FreeNAS_ActiveDirectory_Base(object):
         if self.disable_freenas_cache:
             self.gcount = 0
             log.debug("FreeNAS_ActiveDirectory_Base.get_groups: leave")
-            return
+            return groups
         scope = ldap.SCOPE_SUBTREE
         filter = '(&(objectclass=group)(sAMAccountName=*))'
         if self.attributes and 'groupType' not in self.attributes:
