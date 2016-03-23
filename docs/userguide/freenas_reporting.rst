@@ -8,7 +8,7 @@ Reporting displays several graphs, as seen in the example in Figure 14a. Click t
 
 **Figure 14a: Reporting Graphs**
 
-.. image:: images/reporting.png
+.. image:: images/reporting3.png
 
 FreeNAS® uses
 `collectd <https://collectd.org/>`_
@@ -40,9 +40,11 @@ to provide reporting statistics. The following collectd plugins are enabled in :
 
 *   `uptime <https://collectd.org/wiki/index.php/Plugin:Uptime>`_
     : keeps track of the system uptime, the average running time, and the maximum reached uptime.
+    
+*   target: contains bandwidth statistics for iSCSI ports.
 
 *   `zfs <https://collectd.org/wiki/index.php/Plugin:ZFS_ARC>`_
-    : shows ARC and L2ARC size and hit rates.
+    : shows ARC size, hit ratio, and requests.
 
 Reporting data is saved, allowing you to view and monitor usage trends over time. By default, reporting data is saved to :file:`/data/rrd_dir.tar.bz2` and
 should be preserved across system upgrades and at shutdown. To instead save this data to the system dataset, check the "Reporting database" box in
@@ -50,4 +52,7 @@ should be preserved across system upgrades and at shutdown. To instead save this
 
 Use the magnifier buttons next to each graph to increase or decrease the displayed time increment from 10 minutes, hourly, daily, weekly, or monthly. You can
 also use the "<<" and ">>" buttons to scroll through the output.
+
+`Update on using Graphite with FreeNAS <http://cmhramblings.blogspot.com/2015/12/update-on-using-graphite-with-freenas.html>`_ contains instructions for sending the collected information to
+a `Graphite <http://graphite.wikidot.com/>`_ server.
 

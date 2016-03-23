@@ -554,7 +554,6 @@ class InitialWizard(CommonWizard):
                     CIFS_Share.objects.create(
                         cifs_name=share_name,
                         cifs_path=path,
-                        cifs_vfsobjects=string.join(CIFS_Share._meta.get_field('cifs_vfsobjects').default, ','),
                         **sharekwargs
                     )
 
@@ -2079,9 +2078,7 @@ class CertificateAuthorityImportForm(ModelForm):
         cdata = self.cleaned_data
         certificate = cdata.get('cert_certificate')
         if not certificate:
-            raise forms.ValidationError(_(
-                "Something is seriously jacked up."
-            ))
+            raise forms.ValidationError(_("Empty Certificate!"))
 
         regex = re.compile(r"(-{5}BEGIN[\s\w]+-{5}[^-]+-{5}END[\s\w]+-{5})+", re.M | re.S)
         matches = regex.findall(certificate)
@@ -2109,6 +2106,10 @@ class CertificateAuthorityImportForm(ModelForm):
         if certs:
             raise forms.ValidationError(_(
                 "A certificate with this name already exists."
+            ))
+        if name in ("external", "self-signed", "external - signature pending"):
+            raise forms.ValidationError(_(
+                "{0} is a reserved internal keyword for Certificate Management".format(name)
             ))
         return name
 
@@ -2244,6 +2245,10 @@ class CertificateAuthorityCreateInternalForm(ModelForm):
             raise forms.ValidationError(
                 "A certificate with this name already exists."
             )
+        if name in ("external", "self-signed", "external - signature pending"):
+            raise forms.ValidationError(_(
+                "{0} is a reserved internal keyword for Certificate Management".format(name)
+            ))
         return name
 
     def save(self):
@@ -2368,6 +2373,10 @@ class CertificateAuthorityCreateIntermediateForm(ModelForm):
             raise forms.ValidationError(
                 "A certificate with this name already exists."
             )
+        if name in ("external", "self-signed", "external - signature pending"):
+            raise forms.ValidationError(_(
+                "{0} is a reserved internal keyword for Certificate Management".format(name)
+            ))
         return name
 
     def save(self):
@@ -2578,6 +2587,10 @@ class CertificateImportForm(ModelForm):
             raise forms.ValidationError(_(
                 "A certificate with this name already exists."
             ))
+        if name in ("external", "self-signed", "external - signature pending"):
+            raise forms.ValidationError(_(
+                "{0} is a reserved internal keyword for Certificate Management".format(name)
+            ))
         return name
 
     def save(self):
@@ -2700,6 +2713,10 @@ class CertificateCreateInternalForm(ModelForm):
             raise forms.ValidationError(
                 """You cannnot issue a certificate with a `"` in its name"""
             )
+        if name in ("external", "self-signed", "external - signature pending"):
+            raise forms.ValidationError(_(
+                "{0} is a reserved internal keyword for Certificate Management".format(name)
+            ))
         return name
 
     def save(self):
@@ -2834,6 +2851,10 @@ class CertificateCreateCSRForm(ModelForm):
             raise forms.ValidationError(
                 "A certificate with this name already exists."
             )
+        if name in ("external", "self-signed", "external - signature pending"):
+            raise forms.ValidationError(_(
+                "{0} is a reserved internal keyword for Certificate Management".format(name)
+            ))
         return name
 
     def save(self):

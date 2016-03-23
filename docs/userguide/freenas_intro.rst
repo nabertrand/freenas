@@ -1,4 +1,4 @@
-.. centered:: FreeNAS® is © 2011-2015 iXsystems
+.. centered:: FreeNAS® is © 2011-2016 iXsystems
 
 .. centered:: FreeNAS® and the FreeNAS® logo are registered trademarks of iXsystems.
    
@@ -6,12 +6,12 @@
 
 Written by users of the FreeNAS® network-attached storage operating system.
 
-Version |version|
+Version |release|
 
-Copyright © 2011-2015
+Copyright © 2011-2016
 `iXsystems <http://www.ixsystems.com/>`_
 
-This Guide covers the installation and use of FreeNAS® |version|.
+This Guide covers the installation and use of FreeNAS® |release|.
 
 The FreeNAS® Users Guide is a work in progress and relies on the contributions of many individuals. If you are interested in helping us to improve the Guide,
 read the instructions in the `README <https://github.com/freenas/freenas/blob/master/docs/userguide/README>`_. If you use IRC Freenode, you are welcome to join
@@ -63,7 +63,7 @@ Windows® is a registered trademark of Microsoft Corporation in the United State
 
 **Typographic Conventions**
 
-The FreeNAS® |version| Users Guide uses the following typographic conventions:
+The FreeNAS® |release| Users Guide uses the following typographic conventions:
 
 * Names of graphical elements such as buttons, icons, fields, columns, and boxes are enclosed within quotes. For example: click the "Import CA" button.
 
@@ -90,28 +90,45 @@ system that has been optimized for file storage and sharing.
 FreeNAS® provides a browser-based, graphical configuration interface. Its built-in networking protocols can be configured to provide storage access to a
 wide range of operating systems. A plugins system is provided for extending the built-in features by installing additional software.
 
-.. _What's New in |version|:
+.. _What's New in |release|:
 
 What's New in |version|
 -----------------------
 
-FreeNAS® |version| represents a major upgrade from FreeNAS® 9.3 and introduces a significant number of new technologies, including:
+* Based on FreeBSD 10.3 which adds `these features <https://www.freebsd.org/releases/10.3R/relnotes.html>`_. This includes many new hardware drivers and many updates to existing drivers.
 
-* The system base has been updated to FreeBSD 10.2 which is described in the `FreeBSD 10.2 Release Notes <https://www.freebsd.org/releases/10.2R/relnotes.html>`_. 
+* Samba has been updated to `4.3.4 <https://www.samba.org/samba/history/samba-4.3.4.html>`_.
 
-* A completely new middleware server that mediates all access to FreeNAS® and allows multi-user, multi-role configuration access to the system.
+* USB3 support is now enabled by default.
 
-* A new command line interface with tab-completion, inline help, and high-level access to all FreeNAS® functions and event information.
+* The "Remote Graphite Server Hostname" field has been added to :menuselection:`System --> Advanced`.
 
-* The `GlusterFS <http://www.gluster.org>`_ service provides a scalable, network file system.
+* The "Firmware Update" button has been removed from :menuselection:`System --> Advanced`. Updates should now be performed using :menuselection:`System --> Update`.
 
-* The `IPFS <https://ipfs.io>`_ (Inter-Planetary Filesystem) service provides a global namespace and torrent-style file distribution method for sharing content.
+* The "Disabled" option has been removed from :menuselection:`Storage --> Replication Tasks --> Add Replication --> Encryption Cipher`.
 
-* The `Riak CS (Cloud Storage) <http://docs.basho.com/riakcs/latest/>`_ service adds a distributed, clustering database offering an Amazon S3-compatible cloud storage API.
+* The "Disable Active Directory user/group cache" checkbox has been added to :menuselection:`Directory Service --> Active Directory --> Advanced Mode`.
 
-* The `Stanchion <https://github.com/basho/stanchion>`_ service enforce the serialization of requests for Riak CS. 
+* The "Kerberos keytab" drop-down menu has been renamed to "Kerberos Principal" in :menuselection:`Directory Service --> Active Directory --> Advanced Mode`.
 
-* The `Swift <http://docs.openstack.org/developer/swift/>`_ service provides object storage for `OpenStack <https://www.openstack.org/>`_.
+* The CrucibleWDS plugin has been deprecated and replaced with `CloneDeploy <https://sourceforge.net/projects/clonedeploy/>`_. 
+
+* `htop <http://hisham.hm/htop/>`_ has been added which can be run from :ref:`Shell`.
+
+* The `jed <http://www.jedsoft.org/jed/>`_ editor has been added and can be run from :ref:`Shell`.
+
+.. _What's New Since 9.10 was Released:
+
+What's New Since 9.10 was Released
+----------------------------------
+
+FreeNAS® uses a "rolling release" model instead of point releases. The :ref:`Update` mechanism makes it easy to keep up-to-date with the latest security fixes, bug fixes, and new features.
+Some updates affect the user interface so this section lists any functional changes that have occurred since 9.10 was released.
+
+.. note:: the screenshots in this documentation assume that your system is fully updated to the latest STABLE version of FreeNAS® |version|. If a screen on your
+   system looks different than the documentation, make sure that the system is fully up-to-date and apply any outstanding updates if it is not.
+   
+* The "NFSv3 ownership model for NFSv4" checkbox has been added to :menuselection:`Services --> NFS`.
 
 .. index:: Hardware Recommendations
 .. _Hardware Recommendations:
@@ -119,20 +136,19 @@ FreeNAS® |version| represents a major upgrade from FreeNAS® 9.3 and introduces
 Hardware Recommendations
 ------------------------
 
-Since FreeNAS® |version| is based on FreeBSD 10.2, it supports the same hardware found in the `FreeBSD Hardware Compatibility List
-<http://www.freebsd.org/releases/10.2R/hardware.html>`__. Supported processors are listed in section
-`2.1 amd64 <https://www.freebsd.org/releases/10.2R/hardware.html#proc>`_. FreeNAS® is only available for 64-bit (also known as amd64) processors.
+Since FreeNAS® |release| is based on FreeBSD 10.3, it supports the same hardware found in the `FreeBSD Hardware Compatibility List
+<http://www.freebsd.org/releases/10.3R/hardware.html>`__. Supported processors are listed in section
+`2.1 amd64 <https://www.freebsd.org/releases/10.3R/hardware.html#proc>`_. FreeNAS® is only available for 64-bit (also known as
+amd64) processors.
 
 .. note:: FreeNAS® boots from a GPT partition. This means that the system BIOS must be able to boot using either the legacy BIOS firmware interface or EFI.
 
 Actual hardware requirements will vary depending upon what you are using your FreeNAS® system for. This section provides some guidelines to get you started.
-You can also skim through the
-`FreeNAS® Hardware Forum <https://forums.freenas.org/index.php?forums/hardware.18/>`_ for performance tips from other FreeNAS® users or to post questions
-regarding the hardware best suited to meet your requirements. This
-`forum post <https://forums.freenas.org/index.php?threads/hardware-recommendations-read-this-first.23069/>`_
-provides some specific recommendations if you are planning on purchasing hardware. Refer to
-`Building, Burn-In, and Testing your FreeNAS system <https://forums.freenas.org/index.php?threads/building-burn-in-and-testing-your-freenas-system.17750/>`_ for
-detailed instructions on how to test new hardware.
+You can also skim through the `FreeNAS® Hardware Forum <https://forums.freenas.org/index.php?forums/hardware.18/>`_ for performance tips from other FreeNAS®
+users or to post questions regarding the hardware best suited to meet your requirements. This `forum post
+<https://forums.freenas.org/index.php?threads/hardware-recommendations-read-this-first.23069/>`__ provides some specific recommendations if you are planning on
+purchasing hardware. Refer to `Building, Burn-In, and Testing your FreeNAS system
+<https://forums.freenas.org/index.php?threads/building-burn-in-and-testing-your-freenas-system.17750/>`_ for detailed instructions on how to test new hardware.
 
 .. _RAM:
 
@@ -188,11 +204,6 @@ When determining the type and size of device to install the operating system to,
   sure that a boot environment is no longer needed. Boot environments can be created and deleted using :menuselection:`System --> Boot`.
 
 - when using a USB stick, it is recommended to use a name brand USB stick as ZFS will quickly find errors on cheap, not well made sticks.
-
-- when using a USB stick, USB 3.0 support is disabled by default as it currently is not compatible with some hardware, including Haswell (Lynx point)
-  chipsets. If you receive a "failed with error 19" message when trying to boot FreeNAS®, make sure that xHCI/USB3 is disabled in the system BIOS. While this
-  will downclock the USB ports to 2.0, the bootup and shutdown times will not be significantly different. To see if USB 3.0 support works with your hardware,
-  follow the instructions in :ref:`Tunables` to create a "Tunable" named *xhci_load*, set its value to *YES*, and reboot the system.
   
 - if a reliable boot disk is required, use two identical devices and select them both during the installation. Doing so will create a mirrored boot device.
 
@@ -201,7 +212,8 @@ When determining the type and size of device to install the operating system to,
 Storage Disks and Controllers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The `Disk section <http://www.freebsd.org/releases/10.2R/hardware.html#DISK>`_
+The
+`Disk section <http://www.freebsd.org/releases/10.3R/hardware.html#DISK>`_
 of the FreeBSD Hardware List lists the supported disk controllers. In addition, support for 3ware 6gbps RAID controllers has been added along with the CLI
 utility :command:`tw_cli` for managing 3ware RAID controllers.
 
@@ -211,9 +223,10 @@ If you need reliable disk alerting and immediate reporting of a failed drive, us
 MegaRAID controller or a 3Ware twa-compatible controller.
 
 Suggestions for testing disks before adding them to a RAID array can be found in this
-`forum post <https://forums.freenas.org/index.php?threads/checking-new-hdds-in-raid.12082/>`_.
+`forum post <https://forums.freenas.org/index.php?threads/checking-new-hdds-in-raid.12082/>`__.
 
-`This article <http://technutz.com/purpose-built-nas-hard-drives/>`_ provides a good overview of hard drives which are well suited for a NAS.
+`This article <http://technutz.com/purpose-built-nas-hard-drives/>`_
+provides a good overview of hard drives which are well suited for a NAS.
 
 If you have some money to spend and wish to optimize your disk subsystem, consider your read/write needs, your budget, and your RAID requirements:
 
@@ -223,7 +236,8 @@ If you have some money to spend and wish to optimize your disk subsystem, consid
 
 * 7200 RPM SATA disks are designed for single-user sequential I/O and are not a good choice for multi-user writes.
 
-If you have the budget and high performance is a key requirement, consider a `Fusion-I/O card <http://www.fusionio.com/products/>`_
+If you have the budget and high performance is a key requirement, consider a
+`Fusion-I/O card <http://www.fusionio.com/products/>`_
 which is optimized for massive random access. These cards are expensive and are suited for high-end systems that demand performance. A Fusion-I/O card can be
 formatted with a filesystem and used as direct storage; when used this way, it does not have the write issues typically associated with a flash device. A
 Fusion-I/O card can also be used as a cache device when your ZFS dataset size is bigger than your RAM. Due to the increased throughput, systems running these
@@ -247,7 +261,8 @@ size. Further, when creating a RAIDZ*, only the size of the smallest disk will b
 Network Interfaces
 ~~~~~~~~~~~~~~~~~~
 
-The `Ethernet section <http://www.freebsd.org/releases/10.2R/hardware.html#ETHERNET>`_
+The
+`Ethernet section <http://www.freebsd.org/releases/10.3R/hardware.html#ETHERNET>`_
 of the FreeBSD Hardware Notes indicates which interfaces are supported by each driver. While many interfaces are supported, FreeNAS® users have seen the best
 performance from Intel and Chelsio interfaces, so consider these brands if you are purchasing a new NIC. Realteks will perform poorly under CPU load as
 interfaces with these chipsets do not provide their own processors.

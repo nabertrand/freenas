@@ -2073,9 +2073,9 @@ class FreeNAS_ActiveDirectory_Base(object):
         if results:
             for r in results:
                 if r[0]:
-                    subnets .append(r)
+                    subnets.append(r)
 
-        log.debug("FreeNAS_ActiveDirectory_Base.get_subnets: enter")
+        log.debug("FreeNAS_ActiveDirectory_Base.get_subnets: leave")
         return subnets
 
     def get_sites(self, **kwargs):
@@ -2099,7 +2099,7 @@ class FreeNAS_ActiveDirectory_Base(object):
                 if r[0]:
                     sites.append(r)
 
-        log.debug("FreeNAS_ActiveDirectory_Base.get_sites: enter")
+        log.debug("FreeNAS_ActiveDirectory_Base.get_sites: leave")
         return sites
 
     def get_machine_account(self, machine=None):
@@ -2181,7 +2181,7 @@ class FreeNAS_ActiveDirectory_Base(object):
         if self.disable_freenas_cache:
             self.ucount = 0
             log.debug("FreeNAS_ActiveDirectory_Base.get_users: leave")
-            return
+            return users
         scope = ldap.SCOPE_SUBTREE
         filter = '(&(|(objectclass=user)(objectclass=person))' \
             '(sAMAccountName=*))'
@@ -2261,7 +2261,7 @@ class FreeNAS_ActiveDirectory_Base(object):
         if self.disable_freenas_cache:
             self.gcount = 0
             log.debug("FreeNAS_ActiveDirectory_Base.get_groups: leave")
-            return
+            return groups
         scope = ldap.SCOPE_SUBTREE
         filter = '(&(objectclass=group)(sAMAccountName=*))'
         if self.attributes and 'groupType' not in self.attributes:

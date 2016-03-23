@@ -41,6 +41,15 @@ get_image_name()
     find $(get_product_path) -name "$AVATAR_PROJECT-$AVATAR_ARCH.img.xz" -type f
 }
 
+# Does nothing right now.
+# The old pre-install checks did several things
+# 1:  Don't allow going from FreeNAS to TrueNAS or vice versa
+# 2:  Don't allow downgrading.  (Not sure we can do that now.)
+# 3:  Check memory size and cpu speed.
+pre_install_check()
+{
+    true
+}
 # Convert /etc/version* to /etc/avatar.conf
 #
 # 1 - old /etc/version* file
@@ -149,7 +158,7 @@ get_raid_present()
 
 get_physical_disks_list()
 {
-    local _boot=$(glabel status | awk ' /INSTALL/ { print $3;}')
+    local _boot=$(glabel status | awk ' /iso9660\/(Free|True)NAS/ { print $3;}')
     local _disk
 
     for _disk in $(sysctl -n kern.disks)
@@ -178,10 +187,8 @@ get_media_description()
     _media=$1
     VAL=""
     if [ -n "${_media}" ]; then
-        _description=`pc-sysinstall disk-list -c |grep "^${_media}:"\
-            | awk -F':' '{print $2}'|sed -E 's|.*<(.*)>.*$|\1|'`
-	# if pc-sysinstall doesn't know anything about the device
-	# (raid drives) then fill in for it.
+	_description=`geom disk list ${_media} 2>/dev/null \
+	    | sed -ne 's/^   descr: *//p'`
 	if [ -z "$_description" ] ; then
 		_description="Unknown Device"
 	fi
@@ -306,7 +313,6 @@ create_partitions() {
     if [ $# -eq 2 ]; then
 	_size="-s $2"
     fi
-    gpart destroy -F ${_disk} || true
     if gpart create -s GPT ${_disk}; then
 	if gpart add -t bios-boot -i 1 -s 512k ${_disk}; then
 	    if is_truenas; then
@@ -364,6 +370,13 @@ partition_disk() {
 	
 	_disks=$*
 
+	# Erase both typical metadata area.
+	for _disk in ${_disks}; do
+	    gpart destroy -F ${_disk} >/dev/null 2>&1 || true
+	    dd if=/dev/zero of=/dev/${_disk} bs=1m count=2 >/dev/null
+	    dd if=/dev/zero of=/dev/${_disk} bs=1m oseek=$(diskinfo /dev/${_disk} | awk '{print int($3/(1024*1024))-2;}') >/dev/null || true
+	done
+
 	_minsize=$(get_minimum_size ${_disks})
 	
 	if [ "${_minsize}" = "0k" ]; then
@@ -372,12 +385,6 @@ partition_disk() {
 	fi
 	
 	_disksparts=$(for _disk in ${_disks}; do
-	    gpart destroy -F ${_disk} > /dev/null 2>&1 || true
-	    zpool labelclear -f ${_disk} > /dev/null 2>&1 || true
-	    # Get rid of any MBR.  Shouldn't be necessary,
-	    # but caching seems to have caused problems.
-	    dd if=/dev/zero of=/dev/${_disk} bs=1m count=1 >&2
-
 	    create_partitions ${_disk} ${_minsize} >&2
 	    # Make the disk active
 	    gpart set -a active ${_disk} >&2
@@ -391,6 +398,8 @@ partition_disk() {
 	    _mirror=""
 	fi
 	zpool create -f -o cachefile=/tmp/zpool.cache -o version=28 -O mountpoint=none -O atime=off -O canmount=off freenas-boot ${_mirror} ${_disksparts}
+	zpool set feature@async_destroy=enabled freenas-boot
+	zpool set feature@empty_bpobj=enabled freenas-boot
 	zpool set feature@lz4_compress=enabled freenas-boot
 	zfs set compress=lz4 freenas-boot
 	zfs create -o canmount=off freenas-boot/ROOT
@@ -836,16 +845,14 @@ menu_install()
     # we can now build a config file for pc-sysinstall
     # build_config  ${_disk} "$(get_image_name)" ${_config_file}
 
-    # For one of the install_worker ISO scripts
-    export INSTALL_MEDIA=${_realdisks}
     if [ ${_do_upgrade} -eq 1 ]
     then
         /etc/rc.d/dmesg start
         mkdir -p /tmp/data
 	if [ "${upgrade_style}" = "old" ]; then
-	    	# For old style, we have two potential
-	    	# partitions to look at:  s1a and s2a.
-		# 
+	    # For old style, we have two potential
+	    # partitions to look at:  s1a and s2a.
+	    # 
 	    slice=$(gpart show ${_disk} | grep -F '[active]' | awk ' { print $3;}')
 	    if [ -z "${slice}" ]; then
 		# We don't have an active slice, so something is wrong.
@@ -865,33 +872,18 @@ menu_install()
 		mount /dev/${_disk}s${slice}a /tmp/data
 		ls /tmp/data > /dev/null
 	    fi
-	    # pre-avatar.conf build. Convert it!
-	    if [ ! -e /tmp/data/conf/base/etc/avatar.conf ]
-	    then
-		upgrade_version_to_avatar_conf \
-		    /tmp/data/conf/base/etc/version* \
-		    /etc/avatar.conf \
-		    /tmp/data/conf/base/etc/avatar.conf
-	    fi
-	elif [ "${upgrade_style}" = "new" ]; then
-		zpool import -f -N ${POOL}
-		mount -t zfs -o noatime freenas-boot/ROOT/default /tmp/data
-	else
+	    pre_install_check
+            umount /tmp/data
+	elif [ "${upgrade_style}" != "new" ]; then
 		echo "Unknown upgrade style" 1>&2
 		false
-	fi
-	# This needs to be rewritten.
-        install_worker.sh -D /tmp/data -m / pre-install
-        umount /tmp/data
-	if [ "${upgrade_style}" = "new" ]; then
-	    zpool export freenas-boot
 	fi
         rmdir /tmp/data
     else
         # Run through some sanity checks on new installs ;).. some of the
         # checks won't make sense, but others might (e.g. hardware sanity
         # checks).
-        install_worker.sh -D / -m / pre-install
+	pre_install_check
 
 	# Destroy existing partition table, if there is any but tolerate
 	# failure.
@@ -955,7 +947,8 @@ menu_install()
 	if [ -d /tmp/modules ]; then
             for i in `ls /tmp/modules`
             do
-		cp -np /tmp/modules/$i /tmp/data/boot/modules
+		# If it already exists, simply don't copy it.
+		cp -np /tmp/modules/$i /tmp/data/boot/modules || true
             done
 	fi
 	if [ -d /tmp/fusionio ]; then
@@ -970,9 +963,6 @@ menu_install()
 	    sed -i '' -e 's,^module_path=.*,module_path="/boot/kernel;/boot/modules;/usr/local/modules",g' \
 		-e '/^kernel=.*/d' /tmp/data/boot/loader.conf /tmp/data/boot/loader.conf.local
 	fi
-    fi
-    if is_truenas ; then
-        install_worker.sh -D /tmp/data -m / install
     fi
     
     # To support Xen, we need to disable HPET.

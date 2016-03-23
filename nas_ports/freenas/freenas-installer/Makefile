@@ -10,7 +10,10 @@ VALID_CATEGORIES+=	freenas
 MAINTAINER=	dev@ixsystems.com
 COMMENT=	FreeNAS installer
 
+PRODUCT?=
 USE_XZ=		yes
+
+NO_BUILD=	yes
 
 PREFIX=/
 
@@ -18,7 +21,7 @@ PREFIX=/
 PLIST_SUB=	MACHINE_ARCH=${MACHINE_ARCH}
 
 EXTRACT_ONLY=
-WRKSRC=/usr/nas_source2
+WRKSRC=/usr/nas_source
 
 # no checksum, we just used git!
 checksum fetch:
@@ -31,8 +34,13 @@ ALL_TARGET=obj all
 
 MAKE_JOBS_UNSAFE=yes
 
-do-build:
-	:
+.include <bsd.port.pre.mk>
+
+.if ${PRODUCT} == "TrueNAS"
+PLIST_SUB+=	TRUENAS=""
+.else
+PLIST_SUB+=	TRUENAS="@comment "
+.endif
 
 do-install:
 	mkdir -p ${STAGEDIR}/${PREFIX}/pre-install
@@ -42,5 +50,9 @@ do-install:
 	${INSTALL_SCRIPT} ${WRKSRC}/freenas-installer/etc/rc ${STAGEDIR}/${PREFIX}/etc/rc
 	${INSTALL_SCRIPT} ${WRKSRC}/freenas-installer/lib/functions.sh ${STAGEDIR}/${PREFIX}/lib/functions.sh
 	cp -a ${WRKSRC}/freenas-installer/pre-install/ ${STAGEDIR}/${PREFIX}/pre-install/
+.if ${PRODUCT} == "TrueNAS"
+	${INSTALL_SCRIPT} /usr/truenas/src/freenas-installer/etc/install_sata_dom.sh ${STAGEDIR}/${PREFIX}/etc/install_sata_dom.sh
+	cp -a /usr/truenas/src/freenas-installer/pre-install/ ${STAGEDIR}/${PREFIX}/pre-install/
+.endif
 
-.include <bsd.port.mk>
+.include <bsd.port.post.mk>

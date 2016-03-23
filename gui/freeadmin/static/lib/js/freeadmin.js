@@ -563,6 +563,42 @@ require([
 
     }
 
+    toggleNFSService = function() {
+
+      var v4 = registry.byId("id_nfs_srv_v4");
+      var v4v3owner = registry.byId("id_nfs_srv_v4_v3owner");
+      var srv16 = registry.byId("id_nfs_srv_16");
+
+      if(srv16.get("value") == 'on') {
+        v4v3owner.set("value", false);
+      }
+      if(v4v3owner.get("value") == 'on') {
+        srv16.set("value", false);
+      }
+
+      if(v4.get("value") == 'on') {
+
+        if(v4v3owner.get("value") == 'on') {
+          srv16.set('disabled', true);
+        } else {
+          srv16.set('disabled', false);
+        }
+        if(srv16.get("value") == 'on') {
+          v4v3owner.set('disabled', true);
+        } else {
+          v4v3owner.set('disabled', false);
+        }
+
+      } else {
+
+        v4v3owner.set("value", false);
+        v4v3owner.set("disabled", true);
+        srv16.set("disabled", false);
+
+      }
+
+    }
+
     targetMode = function() {
 
       var q = query('input[name=iscsi_target_mode]:checked');
@@ -573,10 +609,10 @@ require([
       tf.set('oldvalue', tf.get('value'));
 
       if(mode.value == 'fc') {
-        domStyle.set('inline_Target_formset_iscsitargetgroups', 'display', 'none');
+        domStyle.set('inline_iscsitarget_formset_iscsitargetgroups', 'display', 'none');
         tf.set('value', '0');
       } else {
-        domStyle.set('inline_Target_formset_iscsitargetgroups', 'display', '');
+        domStyle.set('inline_iscsitarget_formset_iscsitargetgroups', 'display', '');
         if(oldvalue) tf.set('value', oldvalue);
       }
 

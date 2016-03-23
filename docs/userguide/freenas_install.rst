@@ -28,8 +28,7 @@ This section describes the following:
 Getting FreeNAS®
 -----------------
 
-FreeNAS® 9.3.1 can be downloaded from
-`http://download.freenas.org/ <http://download.freenas.org/>`_.
+The latest STABLE version of FreeNAS® |release| can be downloaded from `http://download.freenas.org/ <http://download.freenas.org/latest/>`_.
 
 .. note:: FreeNAS® will only install to 64-bit hardware and the installer will not work on 32-bit hardware.
 
@@ -62,7 +61,7 @@ The value produced by running the command should match the value of the :file:`s
 Preparing the Media
 -------------------
 
-Beginning with version 9.3, FreeNAS® must be installed using a menu-driven installer, as the ZFS boot partition is created during the installation. To
+FreeNAS® must be installed using a menu-driven installer, as the ZFS boot partition is created during the installation. To
 perform an installation, download the :file:`.iso` file and write it to either a CD or a USB stick.
 
 To burn the :file:`.iso` file to CD, use a CD burning utility.
@@ -95,7 +94,7 @@ the device name representing the device to write to on your system.
 
 ::
 
- dd if=FreeNAS-9.3-RELEASE-x64.iso of=/dev/da0 bs=64k
+ dd if=FreeNAS-9.10-RELEASE-x64.iso of=/dev/da0 bs=64k
  6117+0 records in
  6117+0 records out
  400883712 bytes transferred in 88.706398 secs (4519220 bytes/sec)
@@ -146,11 +145,11 @@ which is faster. When running these commands, substitute the name of the install
  diskutil unmountDisk /dev/disk1
  Unmount of all volumes on disk1 was successful
 
- dd if=FreeNAS-9.3-RELEASE-x64.iso of=/dev/rdisk1 bs=64k
+ dd if=FreeNAS-9.10-RELEASE-x64.iso of=/dev/rdisk1 bs=64k
 
 .. note:: if you get the error "Resource busy" when you run the :command:`dd` command, go to :menuselection:`Applications --> Utilities --> Disk Utility`,
    find your USB thumb drive, and click on its partitions to make sure all of them are unmounted. If you get the error "dd: /dev/disk1: Permission denied",
-   run the :command:`dd` command by typing :command:`sudo dd if=FreeNAS-9.3-RELEASE-x64.iso of=/dev/rdisk1 bs=64k`, which will prompt for your password.
+   run the :command:`dd` command by typing :command:`sudo dd if=FreeNAS-9.10-RELEASE-x64.iso of=/dev/rdisk1 bs=64k`, which will prompt for your password.
 
 The :command:`dd` command will take some minutes to complete. Wait until you get a prompt back and a message that displays how long it took to write the image
 to the USB drive.
@@ -281,9 +280,9 @@ written from the image file. Be very careful that you specify the USB stick when
 Upgrading
 ---------
 
-Beginning with version 9.3, FreeNAS® provides more flexibility for keeping the operating system up-to-date:
+FreeNAS® provides flexibility for keeping the operating system up-to-date:
 
-#. Upgrades to major releases, for example from version 9.3 to 10.0, can still be performed using either an ISO or the graphical administrative interface.
+#. Upgrades to major releases, for example from version 9.3 to 9.10, can still be performed using either an ISO or the graphical administrative interface.
    Unless the Release Notes for the new major release indicate that your current version requires an ISO upgrade, you can use either upgrade method.
 
 #. Minor releases have been replaced with signed updates. This means that
@@ -293,7 +292,7 @@ Beginning with version 9.3, FreeNAS® provides more flexibility for keeping the 
 #. The updater automatically creates a boot environment, meaning that updates are a low-risk operation. Boot environments provide the option to return to the
    previous version of the operating system by rebooting the system and selecting the previous boot environment from the boot menu.
 
-This section describes how to perform an upgrade from an earlier version of FreeNAS® to 9.3.1. Once 9.3.1 is installed, use the instructions in :ref:`Update` to keep
+This section describes how to perform an upgrade from an earlier version of FreeNAS® to |release|. Once |release| is installed, use the instructions in :ref:`Update` to keep
 the system updated.
 
 .. _Caveats:
@@ -301,7 +300,7 @@ the system updated.
 Caveats:
 ~~~~~~~~
 
-Be aware of the following caveats **before** attempting an upgrade to 9.3.1:
+Be aware of the following caveats **before** attempting an upgrade to |release|:
 
 * **Upgrades from FreeNAS® 0.7x are not supported.** The system has no way to import configuration settings from 0.7x versions of FreeNAS®, meaning that you
   will have to manually recreate your configuration, and if supported, import the FreeNAS® 0.7x volumes or disks.
@@ -352,7 +351,7 @@ Before upgrading the operating system, perform the following steps:
 Upgrading Using the ISO
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-To perform an upgrade using this method, `download <http://download.freenas.org/9.3.1/latest/x64/>`_ the :file:`.iso` to the computer that
+To perform an upgrade using this method, `download <http://download.freenas.org/latest/>`_ the :file:`.iso` to the computer that
 will be used to prepare the installation media. Burn the downloaded :file:`.iso` file to a CD or USB thumb drive using the instructions in
 :ref:`Preparing the Media`.
 
@@ -390,38 +389,10 @@ the "Upload Config" button to upload the configuration that you saved before you
 Upgrading From the GUI
 ~~~~~~~~~~~~~~~~~~~~~~
 
-To perform an upgrade using this method, `download <http://download.freenas.org/9.3.1/latest/x64/>`_ the :file:`.txz` file and its
-associated SHA256 hash to the computer that you use to access the FreeNAS® system. Then, go to :menuselection:`System --> Settings --> Advanced --> Firmware Update` as
-shown in Figure 2.5c.
+To perform an upgrade using this method, go to :menuselection:`System --> Update`.
 
-**Figure 2.5c: Upgrading FreeNAS® From the GUI**
-
-.. image:: images/upgrade3a.png
-
-Use the drop-down menu to select an existing volume to temporarily place the firmware file during the upgrade. Alternately, select "Memory device" to allow
-the system to create a temporary RAM disk to be used during the upgrade. After making your selection, click the "OK" button to see the screen shown in Figure
-2.5d.
-
-**Figure 2.5d: Step 2 of 2**
-
-.. image:: images/upgrade4a.png
-
-This screen again reminds you to backup your configuration before proceeding. If you have not yet, click the "click here" link.
-
-Browse to the location of the downloaded :file:`.txz` file, then paste its SHA256 sum.
-
-When finished, click the "Apply Update" button to begin the upgrade progress. Behind the scenes, the following steps are occurring:
-
-* The SHA256 hash is confirmed and an error will display if it does not match. If you get this error, double-check that you pasted the correct checksum and
-  try pasting again.
-
-* The new image is uncompressed and written to the operating system drive. This can take a few minutes so be patient.
-
-* Once the new image is written, you will temporarily lose your connection as the FreeNAS® system will reboot into the new version of the operating system.
-  FreeNAS® will actually reboot twice: once the new operating system loads, the upgrade process applies the new database schema and reboots again.
-
-* Assuming all went well, the FreeNAS® system will receive the same IP from the DHCP server. Refresh your browser after a moment to see if you can access
-  the system.
+Once the update is complete, you will temporarily lose your connection as the FreeNAS® system will reboot into the new version of the operating system.
+Assuming all went well, the FreeNAS® system will receive the same IP from the DHCP server. Refresh your browser after a moment to see if you can access the system.
 
 .. _If Something Goes Wrong:
 
@@ -460,7 +431,7 @@ You can always:
 Upgrading a ZFS Pool
 ~~~~~~~~~~~~~~~~~~~~
 
-Beginning with FreeNAS® 9.3, ZFS pools can be upgraded from the graphical administrative interface.
+In FreeNAS®, ZFS pools can be upgraded from the graphical administrative interface.
 
 Before upgrading an existing ZFS pool, be aware of the following caveats first:
 
@@ -519,7 +490,7 @@ This section demonstrates how to create and access a virtual machine within the 
 VirtualBox
 ~~~~~~~~~~
 
-`VirtualBox <https://www.virtualbox.org/>`_ is an open source virtualization program originally created by Sun Microsystems. VirtualBox runs on Windows, BSD,
+`VirtualBox <https://www.virtualbox.org/>`__ is an open source virtualization program originally created by Sun Microsystems. VirtualBox runs on Windows, BSD,
 Linux, Macintosh, and OpenSolaris. It can be configured to use a downloaded FreeNAS® :file:`.iso` file, and makes a good testing environment for practicing
 configurations or learning how to use the features provided by FreeNAS®.
 

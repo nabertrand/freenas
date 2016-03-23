@@ -44,7 +44,7 @@ does not use a domain name add *.local* to the end of the hostname.
 
 **Figure 5.1a: System Information Tab**
 
-.. image:: images/system1a.png
+.. image:: images/system1b.png
 
 .. _General:
 
@@ -122,14 +122,10 @@ This screen also contains the following buttons:
 user's home directory. Since any configuration changes stored in the configuration database will be erased, this option is handy if you mess up your system or
 wish to return a test system to the original configuration.
 
-**Save Config:** used to create a backup copy of the current configuration database in the format *hostname-version-architecture*.
-**Always save the configuration after making changes and verify that you have a saved configuration before performing an upgrade.** This
-`forum post <http://forums.freenas.org/showthread.php?10735-How-to-automate-FreeNAS-configuration-database-backup>`__
-contains a script to backup the configuration which could be customized and added as a cron job. This
-`forum post <http://forums.freenas.org/showthread.php?12333-Backup-config-only-if-changed>`__
-contains an alternate script which only saves a copy of the configuration when it changes. And this
-`forum post <http://forums.freenas.org/threads/backup-config-file-every-night-automatically.8237>`__
-contains a script for backing up the configuration from another system.
+**Save Config:** used to save a backup copy of the current configuration database in the format *hostname-version-architecture* to the system being used to access the
+administrative interface. It is recommended to always save the configuration after making any configuration changes. Note that while FreeNAS® automatically backs up the configuration
+database to the system dataset every morning at 3:45, this backup will not occur if the system is shutdown at that time and the backup will not be available if the system dataset is
+stored on the boot pool and the boot pool becomes unavailable. You can determine and change the location of the system dataset using :menuselection:`System --> System Dataset`.
 
 **Upload Config:** allows you to browse to the location of a previously saved configuration file in order to restore that configuration. The screen will turn
 red as an indication that the system will need to reboot in order to load the restored configuration.
@@ -184,7 +180,7 @@ explains these options in more detail.
 Boot
 ----
 
-Beginning with version 9.3, FreeNAS® supports a feature of ZFS known as multiple boot environments. With multiple boot environments, the process of updating
+FreeNAS® supports a feature of ZFS known as multiple boot environments. With multiple boot environments, the process of updating
 the operating system becomes a low-risk operation as the updater automatically creates a snapshot of your current boot environment and adds it to the boot
 menu before applying the update. If the update fails, simply reboot the system and select the previous boot environment from the boot menu to instruct the
 system to go back to that system state.
@@ -201,7 +197,7 @@ created indicating the date and time the wizard was run.
 
 **Figure 5.3a: Viewing Boot Environments**
 
-.. image:: images/be1e.png
+.. image:: images/be1f.png
 
 Each boot environment entry contains the following information:
 
@@ -213,6 +209,11 @@ Each boot environment entry contains the following information:
 
 Highlight an entry to view its configuration buttons.  The following configuration buttons are available:
 
+* **Delete:** used to delete the highlighted entry, which also removes that entry from the boot menu. Since you can not delete an entry that has been activated, this button will
+  not appear for the active boot environment. If you need to delete an entry that  is currently activated, first activate another entry, which will clear the
+  *On reboot* field of the currently activated entry. Note that this button will not be displayed for the "default" boot environment as this entry is needed in order to return the system to
+  the original installation state.
+
 * **Rename:** used to change the name of the boot environment.
 
 * **Activate:** will only appear on entries which are not currently set to "Active". Changes the selected entry to the default boot entry on next boot. Its
@@ -220,10 +221,6 @@ Highlight an entry to view its configuration buttons.  The following configurati
   but won't be used on the next boot.
 
 * **Clone:** used to create a copy of the highlighted boot environment.
-
-* **Delete:** used to delete the highlighted entries, which also removes these entries from the boot menu. You
-  **can not** delete an entry that has been activated. If you need to delete an entry that you created and it is currently activated, first activate another
-  entry, which will clear the *On reboot* field of the currently activated entry. 
 
 The buttons above the boot entries can be used to:
 
@@ -350,6 +347,10 @@ Advanced
 +-----------------------------------------+----------------------------------+------------------------------------------------------------------------------+
 | Periodic Notification User              | drop-down menu                   | select the user to receive security output emails; this output runs nightly  |
 |                                         |                                  | but only sends an email when the system reboots or encounters an error       |
+|                                         |                                  |                                                                              |
++-----------------------------------------+----------------------------------+------------------------------------------------------------------------------+
+| Remote Graphite Server hostname         | string                           | input the IP address or hostname of a remote server that is running          |
+|                                         |                                  | a `Graphite <http://graphite.wikidot.com/>`_ server                          |
 |                                         |                                  |                                                                              |
 +-----------------------------------------+----------------------------------+------------------------------------------------------------------------------+
 
@@ -530,7 +531,7 @@ Tunables
 #. **FreeBSD loaders:** a loader is only loaded when a FreeBSD-based system boots and can be used to pass a parameter to the kernel or to load an additional
    kernel module such as a FreeBSD hardware driver.
 
-#. **FreeBSD rc.conf options:** `rc.conf(5) <https://www.freebsd.org/cgi/man.cgi?query=rc.conf&apropos=0&sektion=0&manpath=FreeBSD+9.3-RELEASE>`_ is used to
+#. **FreeBSD rc.conf options:** `rc.conf(5) <https://www.freebsd.org/cgi/man.cgi?query=rc.conf&apropos=0&sektion=0&manpath=FreeBSD+10.3-RELEASE>`_ is used to
    pass system configuration options to the system startup scripts as the system boots. Since FreeNAS® has been optimized for storage, not all of the
    services mentioned in rc.conf(5) are available for configuration. Note that in FreeNAS®, customized rc.conf options are stored in
    :file:`/tmp/rc.conf.freenas`.
@@ -590,7 +591,7 @@ attempting to change it from :ref:`Shell`. For example, to change the value of *
 :command:`sysctl net.inet.tcp.delay_ack=1`. If the sysctl value is read-only, an error message will indicate that the setting is read-only. If you do not get
 an error, the setting is now applied. For the setting to be persistent across reboots, the sysctl must still be added in :menuselection:`System --> Tunables`.
 
-The GUI does not display the sysctls that are pre-set when FreeNAS® is installed. FreeNAS® 9.3.1 ships with the following sysctls set::
+The GUI does not display the sysctls that are pre-set when FreeNAS® is installed. FreeNAS® |release| ships with the following sysctls set::
 
  kern.metadelay=3
  kern.dirdelay=4
@@ -603,17 +604,17 @@ The GUI does not display the sysctls that are pre-set when FreeNAS® is installe
 
 **Do not add or edit these default sysctls** as doing so may render the system unusable.
 
-The GUI does not display the loaders that are pre-set when FreeNAS® is installed. FreeNAS® 9.3.1 ships with the following loaders set::
+The GUI does not display the loaders that are pre-set when FreeNAS® is installed. FreeNAS® |release| ships with the following loaders set::
 
  autoboot_delay="2"
  loader_logo="freenas"
  loader_menu_title="Welcome to FreeNAS"
  loader_brand="freenas-brand"
  loader_version=" "
+ kern.cam.boot_delay="30000"
  debug.debugger_on_panic=1
  debug.ddb.textdump.pending=1
  hw.hptrr.attach_generic=0
- kern.ipc.nmbclusters="262144"
  vfs.mountroot.timeout="30"
  ispfw_load="YES"
  hint.isp.0.role=2
@@ -623,11 +624,15 @@ The GUI does not display the loaders that are pre-set when FreeNAS® is installe
  module_path="/boot/kernel;/boot/modules;/usr/local/modules"
  net.inet6.ip6.auto_linklocal="0"
  vfs.zfs.vol.mode=2
+ kern.geom.label.disk_ident.enable="0"
+ hint.ahciem.0.disabled="1"
+ hint.ahciem.1.disabled="1"
+ kern.msgbufsize="524288"
  hw.usb.no_shutdown_wait=1
 
 **Do not add or edit the default tunables** as doing so may render the system unusable.
 
-The ZFS version used in 9.3.1 deprecates the following tunables::
+The ZFS version used in |release| deprecates the following tunables::
 
  vfs.zfs.write_limit_override
  vfs.zfs.write_limit_inflated
@@ -644,7 +649,7 @@ tunables back.
 Update
 ------
 
-Beginning with version 9.3, FreeNAS® uses signed updates rather than point releases. This provides the FreeNAS® administrator more flexibility in deciding
+FreeNAS® uses signed updates rather than point releases. This provides the FreeNAS® administrator more flexibility in deciding
 when to upgrade the system in order to apply system patches or to add new drivers or features. It also allows the administrator to "test drive" an upcoming
 release. Combined with boot environments, an administrator can try new features or apply system patches with the knowledge that they can revert to a previous
 version of the operating system, using the instructions in :ref:`If Something Goes Wrong`. Signed patches also mean that the administrator no longer has to
@@ -654,7 +659,7 @@ Figure 5.8a shows an example of the :menuselection:`System --> Update` screen.
 
 **Figure 5.8a: Update Options**
 
-.. image:: images/update1a.png
+.. image:: images/update1c.png
 
 By default, the system will automatically check for updates and will issue an alert when a new update becomes available. To disable this default, uncheck the
 box "Automatically check for updates".
@@ -664,12 +669,15 @@ This screen also shows which software branch, or train, the system is currently 
 * **FreeNAS-10-Nightlies:** this train should
   **not be used in production**. It represents the experimental branch for the future 10 version and is meant only for bleeding edge testers and developers.
 
-* **FreeNAS-9.3-Nightlies:** this train has the latest, but still being tested, fixes and features. Unless you are testing a new feature, you do not want to
+* **FreeNAS-9.10-Nightlies:** this train has the latest, but still being tested, fixes and features. Unless you are testing a new feature, you do not want to
   run this train in production.
-
-* **FreeNAS-9.3-STABLE:** this is the
+  
+* **FreeNAS-9.10-STABLE:**  this is the
   **recommended train for production use**. Once new fixes and features have been tested, they are added to this train. It is recommended to follow this train
-  and to apply any of its pending updates.
+  and to apply any of its pending updates. 
+
+* **FreeNAS-9.3-STABLE:** this is the maintenance-only mode for an older version of FreeNAS®. It is recommended to upgrade to "FreeNAS-9.10-STABLE", by selecting that train, to ensure that
+  the system receives bug fixes and new features.
 
 To change the train, use the drop-down menu to make a different selection. It also lists the URL of the official update server should that information be
 needed in a network with outbound firewall restrictions.
@@ -679,7 +687,7 @@ menu will list any files with checksum mismatches or permission errors.
 
 To see if any updates are available, make sure the desired train is selected and click the "Check Now" button. If there are any updates available, they will
 be listed. In the example shown in Figure 5.8b, the numbers which begin with a *#* represent the bug report number from
-`bugs.freenas.org <http://bugs.freenas.org>`_. Numbers which do not begin with a *#* represent a git commit. Click the "ChangeLog" hyperlink to open the log
+`bugs.freenas.org <https://bugs.freenas.org>`__. Numbers which do not begin with a *#* represent a git commit. Click the "ChangeLog" hyperlink to open the log
 of changes in your web browser. Click the "ReleaseNotes" hyperlink to open the Release Notes in your web browser.
 
 **Figure 5.8b: Reviewing Updates**
@@ -709,7 +717,7 @@ reboot after the updates are applied.
 CAs
 ---
 
-Beginning with version 9.3, FreeNAS® can act as a Certificate Authority (CA). If you plan to use SSL or TLS to encrypt any of the connections to the
+FreeNAS® can act as a Certificate Authority (CA). If you plan to use SSL or TLS to encrypt any of the connections to the
 FreeNAS® system, you will need to first create a CA, then either create or import the certificate to be used for encrypted connections. Once you do this,
 the certificate will appear in the drop-down menus for all the services that support SSL or TLS.
 
@@ -812,7 +820,7 @@ If you click the entry for a CA, the following buttons become available:
   X.509 certificate.
 
 * **Export Private Key:** will prompt to browse to the location, on the system being used to access the FreeNAS® system, to save a copy of the CA's private
-  key.
+  key. Note that this option only appears if the CA has a private key.
 
 * **Delete:** will prompt to confirm before deleting the CA.
 
@@ -822,8 +830,8 @@ If you click the entry for a CA, the following buttons become available:
 Certificates
 ------------
 
-Beginning with version 9.3, FreeNAS® can import existing certificates, create new certificates, and issue certificate
-signing requests so that created certificates can be signed by the CA which was previously imported or created in :ref:`CAs`.
+FreeNAS® can import existing certificates, create new certificates, and issue certificate signing requests so that created certificates can be signed by the CA which was previously imported
+or created in :ref:`CAs`.
 
 Figure 5.10a shows the initial screen if you click :menuselection:`System --> Certificates`.
 
@@ -949,7 +957,7 @@ This screen provides a built-in interface to the FreeNAS® bug tracker located a
 FreeNAS® bug tracker, you must first go to that website, click the "Register" link, fill out the form, and reply to the register email. You will then have a
 username and password which can be used to create bug reports and receive notifications as your reports are actioned.
 
-Before creating a bug report or feature request, ensure that an existing report does not already exist at `bugs.freenas.org <https://bugs.freenas.org>`_. If
+Before creating a bug report or feature request, ensure that an existing report does not already exist at `bugs.freenas.org <https://bugs.freenas.org>`__. If
 you find a similar issue that is not yet marked as "closed" or "resolved", add a comment to that issue if you have new information to provide that can assist
 in resolving the issue. If you find a similar issue that is marked as "closed" or "resolved", you can create a new issue and refer to the earlier issue
 number.
@@ -958,7 +966,7 @@ number.
 
 To generate a report using the built-in "Support" screen, complete the following fields:
 
-* **Username:** input the login name you created when registering at `bugs.freenas.org <https://bugs.freenas.org>`_.
+* **Username:** input the login name you created when registering at `bugs.freenas.org <https://bugs.freenas.org>`__.
 
 * **Password:** input the password associated with the registered login name.
 
@@ -977,6 +985,5 @@ To generate a report using the built-in "Support" screen, complete the following
 
 * **Attachments:** this is the only optional field. It is useful for including configuration files or screenshots of any errors or tracebacks.
 
-Once you have finished completing the fields, click the "Submit" button to automatically generate and upload the report to
-`bugs.freenas.org <https://bugs.freenas.org>`_. A pop-up menu will provide a clickable URL so that you can view the status of or add additional information to
-the report.
+Once you have finished completing the fields, click the "Submit" button to automatically generate and upload the report to `bugs.freenas.org
+<https://bugs.freenas.org>`__. A pop-up menu will provide a clickable URL so that you can view the status of or add additional information to the report.

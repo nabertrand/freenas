@@ -735,10 +735,17 @@ class CertificateBase(Model):
     def write_certificate(self, path=None):
         if not path:
             path = self.get_certificate_path()
+        chain_to_write = []
         if self.cert_chain:
-            write_certificate_chain(self.get_certificate_chain(), path)
+            chain_to_write = self.get_certificate_chain()
         else:
-            write_certificate(self.get_certificate(), path)
+            chain_to_write.append(self.get_certificate())
+            signing_CA = self.cert_issuer
+            while signing_CA not in ["external", "self-signed", "external - signature pending"]:
+                chain_to_write.append(signing_CA.get_certificate())
+                signing_CA = signing_CA.cert_issuer
+
+        write_certificate_chain(chain_to_write, path)
 
     def write_privatekey(self, path=None):
         if not path:
@@ -811,11 +818,11 @@ class CertificateBase(Model):
     def cert_issuer(self):
         issuer = None
 
-        if self.cert_type in (CA_TYPE_EXISTING, CA_TYPE_INTERMEDIATE, CERT_TYPE_EXISTING):
+        if self.cert_type in (CA_TYPE_EXISTING, CERT_TYPE_EXISTING):
             issuer = "external"
         elif self.cert_type == CA_TYPE_INTERNAL:
             issuer = "self-signed"
-        elif self.cert_type == CERT_TYPE_INTERNAL:
+        elif self.cert_type in (CERT_TYPE_INTERNAL, CA_TYPE_INTERMEDIATE):
             issuer = self.cert_signedby
         elif self.cert_type == CERT_TYPE_CSR:
             issuer = "external - signature pending"

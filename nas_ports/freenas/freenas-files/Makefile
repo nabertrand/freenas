@@ -10,6 +10,7 @@ VALID_CATEGORIES+=	freenas
 MAINTAINER=	dev@ixsystems.com
 COMMENT=	miscellaneous files for FreeNAS
 
+PRODUCT?=
 PREFIX=/
 
 # explicitly set this for the port build
@@ -17,7 +18,7 @@ FREEBSD_SRCTOP=/usr/src
 PLIST_SUB=	MACHINE_ARCH=${MACHINE_ARCH}
 
 EXTRACT_ONLY=
-WRKSRC=/usr/nas_source2
+WRKSRC=/usr/nas_source
 
 # no checksum, we just used git!
 checksum fetch:
@@ -29,6 +30,8 @@ pre-clean:
 ALL_TARGET=obj all
 
 MAKE_JOBS_UNSAFE=yes
+
+.include <bsd.port.pre.mk>
 
 do-build:
 	${MAKE} -C ${WRKSRC}/extract-tarball   obj
@@ -53,9 +56,22 @@ do-install:
 	#
 	#
 	${CP} -a ${WRKSRC}/freenas/ ${STAGEDIR}/
-	(cd ${WRKSRC}/freenas; ${FIND} . \( -type f -o -type l \) \
+.if ${PRODUCT} == "TrueNAS"
+	${RM} \
+		${STAGEDIR}/boot/loader.conf \
+		${STAGEDIR}/boot/loader.rc.local \
+		${STAGEDIR}/etc/sysctl.conf \
+		${STAGEDIR}/etc/pf.conf.block \
+		${STAGEDIR}/etc/motd \
+		${STAGEDIR}/etc/ix.rc.d/ix-fstab \
+		${STAGEDIR}/etc/ix.rc.d/ix-loader \
+		${STAGEDIR}/etc/ix.rc.d/ix_pf_early \
+		${STAGEDIR}/etc/ix.rc.d/ix_pf_late \
+		${STAGEDIR}/etc/ix.rc.d/ix-sysctl
+.endif
+	(cd ${STAGEDIR}; ${FIND} . \( -type f -o -type l \) \
 		| ${SED} -e 's,^\./,,g' \
 		| ${AWK} '{print length, $$0}' | ${SORT} -rn \
 		| ${AWK} '{print $$2 }' >> ${TMPPLIST})
 
-.include <bsd.port.mk>
+.include <bsd.port.post.mk>
